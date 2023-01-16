@@ -33,12 +33,12 @@ class coords:
         # 원본 이미지에 contour(외곽선)을 그림, 빨간색(0, 0, 255), 두께 1로 -- 확인용
         cv2.drawContours(origin_img, contours, -1, (0, 0, 255), 1)
 
-        # # 이미지 출력
-        # cv2.imshow('result', origin_img)
-        # # 아무키나 누르면
-        # cv2.waitKey(0)
-        # # 모든창 닫기
-        # cv2.destroyAllWindows()
+        # 이미지 출력
+        cv2.imshow('result', origin_img)
+        # 아무키나 누르면
+        cv2.waitKey(0)
+        # 모든창 닫기
+        cv2.destroyAllWindows()
 
         result = list(contours)
         result.sort(key=len)
@@ -88,9 +88,14 @@ target="_self" />''')
 </html>''')
         f.close()
 
+    def labeling(contours):
+        alt = [len(contours)]
+
+        return alt
+
 
 # 이미지 경로 확장자까지 입력하기
 imgpath = "korea_b.png"
 contours = coords.extract(imgpath)
 # 1은 좌표를 n분의 1로 줄이는 n변수
-coords.printhtml(contours, 1)
+coords.printhtml(contours, 5)
