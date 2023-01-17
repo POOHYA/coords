@@ -95,6 +95,15 @@ target="_self" />''')
         cv2.imshow('label', img)
         cv2.setMouseCallback('label', coords.on_mouse, img)
 
+        for i in range(len(contours)):
+            # img 다 0으로 만들기?
+            mask = np.zeros(img.shape).astype(img.dtype)
+            color = [255, 255, 255]
+            # 경계선 내부 255로 채우기
+            mask = cv2.fillPoly(mask, [contours[i]], color)
+            res = cv2.bitwise_and(img, mask)
+            x, y, w, h = cv2.boundingRect(contours[i])
+
         # alt = list()
         # contours_min = list()
         # contours_max = list()
@@ -110,6 +119,7 @@ target="_self" />''')
         # 이미지 출력
 
     def on_mouse(event, x, y, flags, param):
+        global xy
         xy = list()
         # event는 마우스 동작 상수값, 클릭, 이동 등등
         # x, y는 내가 띄운 창을 기준으로 좌측 상단점이 0,0이 됌
@@ -120,12 +130,10 @@ target="_self" />''')
         mask = np.zeros((rows+2, cols+2), np.uint8)
         # 채우기에 사용할 색 ---②
         newVal = (0, 0, 255)
-        # 최소 최대 차이 값 ---③
-        loDiff, upDiff = (10, 10, 10), (10, 10, 10)
         if event == cv2.EVENT_FLAG_LBUTTON:
             seed = (x, y)
             # 색 채우기 적용 ---④
-            retval = cv2.floodFill(img, mask, seed, newVal, loDiff, upDiff)
+            retval = cv2.fillPoly(img, contours, newVal)
             # 채우기 변경 결과 표시 ---⑤
             cv2.imshow('label', img)
             print(x, y)

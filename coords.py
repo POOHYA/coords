@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import sys
 
 
 class coords:
@@ -16,13 +15,20 @@ class coords:
         # 이미지 그레이 전환
         imgray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-        # 흑과 백으로 임계(threshold) 분할
-        test, thresh = cv2.threshold(imgray, 127, 255, 0)
-        contours, hierarchy = cv2.findContours(
-            thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)     # contour(외곽선)를 찾아냄.(연속된 좌표점)
+        # # 흑과 백으로 임계(threshold) 분할
+        # test, thresh = cv2.threshold(imgray, 127, 255, 0)
+        # contours, hierarchy = cv2.findContours(
+        #     thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)     # contour(외곽선)를 찾아냄.(연속된 좌표점)
 
-        # contour(외곽선)을 그림, 검은색(0, 0, 0), 두께 1로 // 경계 나누기용
-        cv2.drawContours(img, contours, -1, (0, 0, 0), 1)
+        # # contour(외곽선)을 그림, 검은색(0, 0, 0), 두께 1로 // 경계 나누기용
+        # cv2.drawContours(img, contours, -1, (0, 0, 0), 1)
+
+        # # 이미지 출력
+        # cv2.imshow('result', img)
+        # # 아무키나 누르면
+        # cv2.waitKey(0)
+        # # 모든창 닫기
+        # cv2.destroyAllWindows()
 
         imgray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
         # 흑과 백으로 임계(threshold) 분할
@@ -40,10 +46,15 @@ class coords:
         # 모든창 닫기
         cv2.destroyAllWindows()
 
-        result = list(contours)
-        result.sort(key=len)
-        result.reverse()
-
+        temp = list(contours)
+        temp.sort(key=len)
+        temp.reverse()
+        result = list()
+        for i in range(len(temp)):
+            # 작은 구역은 좌표를 출력하지 않고 PASS
+            if len(temp[i]) < 10:
+                continue
+            result.append(temp[i])
         return result
 
     def printhtml(contours, n=1):
@@ -58,44 +69,24 @@ class coords:
 <img src="''' + imgpath + ''' "usemap = "#test"/>
 <map name="test">
 ''')
-        f.close()
-        sys.stdout = open('result.html', 'a')
-
         for i in range(len(contours)):
-            # 작은 구역은 좌표를 출력하지 않고 PASS
-            if len(contours[i]) < 10:
-                continue
-            else:
-                # contours 간격을 n분의 1로 조정하여 출력
-                arr = np.array(contours[i][0:len(contours[i]):num])
-                # N차원의 contours 배열을 1차원으로 축소
-                result = arr.ravel()
-                print('<area shape=\"poly\" alt=\"\" title=\"' +
-                      str(i+1) + '\" coords=\"')
-                print(
-                    *result, sep=",", end=",")                                            # 배열사이에 들어갈 문자를 지정한 뒤 출력
-            # 첫번째 좌표를 마지막에 추가
-                print(*result[0:2], sep=',', end="\"")
-                print('''
-href="" 
-target="_self" />''')
-        sys.stdout.close()
-
-        f = open('result.html', 'a')
+            # contours 간격을 n분의 1로 조정하여 출력
+            arr = np.array(contours[i][0:len(contours[i]):num])
+            # N차원의 contours 배열을 1차원으로 축소
+            result = arr.ravel()
+            f.write('<area shape=\"poly\" alt=\"\" title=\"' +
+                    str(i+1)+'\" coords=\"')
+            # 배열사이에 들어갈 문자를 지정한 뒤 출력 and 첫번째 좌표를 마지막에 추가
+            f.write(str(result).replace("[", "").replace(
+                "]", "").replace(" ", ","))  # +result[0:2]
+            f.write('" href="" target="_self" />\n')
         f.write('''
 </map>
 </body>
 </html>''')
-        f.close()
-
-    def labeling(contours):
-        alt = [len(contours)]
-
-        return alt
 
 
 # 이미지 경로 확장자까지 입력하기
-imgpath = "korea_b.png"
+imgpath = "seoul_gu.png"
 contours = coords.extract(imgpath)
-# 1은 좌표를 n분의 1로 줄이는 n변수
 coords.printhtml(contours, 5)
